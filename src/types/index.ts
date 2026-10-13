@@ -11,10 +11,34 @@ export interface ColorSwatch {
   hex: string;
 }
 
+export interface FabricScanItem {
+  id: string;
+  name: string;             // เช่น ผ้านิตคอตตอนทอละเอียด, ผ้าริบขอบ 1x1, ลายทอ Jacquard
+  location: string;         // ตัวเสื้อ, ขอบคอ/แขน/ชายเสื้อ, ลายทอ
+  texture: string;          // ละเอียด แน่น นุ่ม ยืดหยุ่นได้ปานกลาง
+}
+
+export interface ColorScanItem {
+  id: string;
+  name: string;             // Off-white / Cream, Pastel Baby Blue, Blossom Pink, Espresso Brown
+  hex: string;
+  percentage: number;       // สัดส่วนพื้นที่ เช่น 65, 20, 10, 5
+  role: 'primary' | 'secondary' | 'accent';
+  selected: boolean;
+}
+
+export interface FabricColorScanResult {
+  detectedFabrics: FabricScanItem[];
+  detectedColors: ColorScanItem[];
+  colorMode: 'multi_color' | 'single_focus'; // หลายสีตามลาย หรือเจาะจงสีเดียว
+  focusedColorId?: string;                   // สีที่ผู้ใช้เลือกเน้น
+}
+
 export interface GarmentDNA {
   fabricType: string;              // e.g. Silk Chiffon, French Tweed, Heavy Cotton
   fabricPhysics: string;           // e.g. Flowing, stiff, lustrous, matte, structured
   colorPalette: ColorSwatch[];     // Primary & accent colors with Hex codes
+  fabricColorScan?: FabricColorScanResult; // ผลการสแกนชนิดผ้าและจานสีแบบละเอียด
   silhouette: {
     neckline: string;              // V-neck, sweetheart, high collar, cowl
     sleeves: string;               // Sleeveless, puff short sleeve, bishop sleeve

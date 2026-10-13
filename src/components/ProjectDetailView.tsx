@@ -5,6 +5,7 @@ import { GoogleFlowPromptCard } from './GoogleFlowPromptCard';
 import { GarmentDnaView } from './GarmentDnaView';
 import { CumulativeMemoryTimeline } from './CumulativeMemoryTimeline';
 import { RevisionModal } from './RevisionModal';
+import { PersistentReferenceSidebar } from './PersistentReferenceSidebar';
 import { ArrowLeft, Video, Sparkles, BrainCircuit, ShieldCheck, Film, Layers, CheckCircle2, ChevronRight, User } from 'lucide-react';
 import { ProjectStorage } from '../lib/storage';
 
@@ -259,42 +260,53 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
 
       </div>
 
-      {/* Tab Panels */}
-      <div>
-        {/* Step 1: Garment DNA Passport */}
-        {activeTab === 'dna' && project.garmentDna && (
-          <GarmentDnaView
-            dna={project.garmentDna}
-            onUpdateDna={handleUpdateDna}
-          />
-        )}
+      {/* Main Workspace with Persistent Reference Sidebar across ALL tabs */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Left Column: Active Step Workspace (Takes 8-9 cols) */}
+        <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+          
+          {/* Step 1: Garment DNA Passport */}
+          {activeTab === 'dna' && project.garmentDna && (
+            <GarmentDnaView
+              dna={project.garmentDna}
+              onUpdateDna={handleUpdateDna}
+            />
+          )}
 
-        {/* Step 2: Google Flow Studio */}
-        {activeTab === 'flow' && project.garmentDna && (
-          <GoogleFlowPromptCard
-            project={project}
-            dna={project.garmentDna}
-            memories={project.revisionMemories || []}
-            onAddIterationVideo={handleAttachVideo}
-          />
-        )}
+          {/* Step 2: Google Flow Studio */}
+          {activeTab === 'flow' && project.garmentDna && (
+            <GoogleFlowPromptCard
+              project={project}
+              dna={project.garmentDna}
+              memories={project.revisionMemories || []}
+              onAddIterationVideo={handleAttachVideo}
+            />
+          )}
 
-        {/* Step 3: Video Review Room (Definition of Done) */}
-        {activeTab === 'review' && (
-          <VideoReviewRoom
-            project={project}
-            currentIteration={currentIteration}
-            onAccept={handleAcceptDoD}
-            onRequestRevision={() => setIsRevisionModalOpen(true)}
-          />
-        )}
+          {/* Step 3: Video Review Room (Definition of Done) */}
+          {activeTab === 'review' && (
+            <VideoReviewRoom
+              project={project}
+              currentIteration={currentIteration}
+              onAccept={handleAcceptDoD}
+              onRequestRevision={() => setIsRevisionModalOpen(true)}
+            />
+          )}
 
-        {/* Step 4: AI Cumulative Memory Bank */}
-        {activeTab === 'memory' && (
-          <CumulativeMemoryTimeline
-            memories={project.revisionMemories || []}
-          />
-        )}
+          {/* Step 4: AI Cumulative Memory Bank */}
+          {activeTab === 'memory' && (
+            <CumulativeMemoryTimeline
+              memories={project.revisionMemories || []}
+            />
+          )}
+        </div>
+
+        {/* Right Column: Persistent Reference Sidebar (Always visible on all tabs!) */}
+        <div className="lg:col-span-4 xl:col-span-3 sticky top-20">
+          <PersistentReferenceSidebar project={project} />
+        </div>
+
       </div>
 
       {/* Revision Modal */}

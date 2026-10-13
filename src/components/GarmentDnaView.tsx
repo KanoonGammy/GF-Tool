@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { GarmentDNA, ColorSwatch } from '../types';
-import { Sparkles, Palette, Scissors, ShieldAlert, Ban, Check, Edit2 } from 'lucide-react';
+import { GarmentDNA, ColorSwatch, FabricColorScanResult } from '../types';
+import { Sparkles, Palette, Scissors, ShieldAlert, Ban, Check, Edit2, Layers } from 'lucide-react';
+import { FabricColorScanner } from './FabricColorScanner';
 
 interface GarmentDnaViewProps {
   dna: GarmentDNA;
@@ -16,14 +17,39 @@ export const GarmentDnaView: React.FC<GarmentDnaViewProps> = ({ dna, onUpdateDna
     setIsEditing(false);
   };
 
+  const handleUpdateScan = (updatedScan: FabricColorScanResult) => {
+    const updated = {
+      ...dna,
+      fabricColorScan: updatedScan
+    };
+    onUpdateDna(updated);
+  };
+
+  // Fallback scan if not present
+  const activeScan: FabricColorScanResult = dna.fabricColorScan || {
+    detectedFabrics: [
+      { id: 'f-1', name: dna.fabricType, location: 'ตัวเสื้อหลัก', texture: dna.fabricPhysics },
+      { id: 'f-2', name: 'ขอบริบและตะเข็บเข้ารูป', location: 'ขอบคอ/แขน/ชายเสื้อ', texture: 'ยืดหยุ่น กระชับ อยู่ทรง' }
+    ],
+    detectedColors: dna.colorPalette.map((col, idx) => ({
+      id: `c-${idx}`,
+      name: col.name,
+      hex: col.hex,
+      percentage: idx === 0 ? 65 : Math.floor(35 / (dna.colorPalette.length - 1 || 1)),
+      role: idx === 0 ? 'primary' : 'accent',
+      selected: true
+    })),
+    colorMode: 'multi_color'
+  };
+
   return (
-    <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+    <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden space-y-6">
       
       {/* Background Accent */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-4 border-b border-slate-800">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-pink-500/10 text-pink-400 border border-pink-500/20 flex items-center justify-center">
             <Sparkles className="w-4 h-4" />
@@ -57,6 +83,13 @@ export const GarmentDnaView: React.FC<GarmentDnaViewProps> = ({ dna, onUpdateDna
         </button>
       </div>
 
+      {/* Section 1: Detailed Fabric & Color Scanner (จุดที่ user ขอให้สแกนได้) */}
+      <FabricColorScanner
+        scanResult={activeScan}
+        onUpdateScan={handleUpdateScan}
+      />
+
+      {/* Section 2: Silhouette & Physics Details */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Left Column: Fabric & Colors */}
@@ -90,32 +123,6 @@ export const GarmentDnaView: React.FC<GarmentDnaViewProps> = ({ dna, onUpdateDna
                 <div className="text-xs text-slate-400 mt-1 leading-relaxed">{dna.fabricPhysics}</div>
               </div>
             )}
-          </div>
-
-          {/* Color Palette Swatches */}
-          <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4">
-            <div className="flex items-center gap-2 text-xs font-bold text-indigo-300 mb-2.5">
-              <Palette className="w-3.5 h-3.5" />
-              <span>จานสีมาตรฐาน (Color Palette & Hex)</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              {dna.colorPalette.map((col, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-900 border border-slate-800"
-                >
-                  <div
-                    className="w-7 h-7 rounded-lg border border-white/20 shadow-inner flex-shrink-0"
-                    style={{ backgroundColor: col.hex }}
-                  />
-                  <div className="min-w-0">
-                    <div className="text-xs font-medium text-slate-200 truncate">{col.name}</div>
-                    <div className="text-[10px] text-slate-400 font-mono">{col.hex}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Unique Details */}
@@ -156,7 +163,7 @@ export const GarmentDnaView: React.FC<GarmentDnaViewProps> = ({ dna, onUpdateDna
                 <span className="font-semibold text-slate-200 text-right">{dna.silhouette.waist}</span>
               </div>
               <div className="flex items-start justify-between py-1">
-                <span className="text-slate-400">ชายกระโปรง (Hemline):</span>
+                <span className="text-slate-400">ชายเสื้อ/กระโปรง (Hemline):</span>
                 <span className="font-semibold text-slate-200 text-right">{dna.silhouette.hemline}</span>
               </div>
             </div>
