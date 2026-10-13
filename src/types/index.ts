@@ -69,6 +69,28 @@ export interface VideoIteration {
   };
 }
 
+export interface ModelPersona {
+  id: string;
+  name: string;
+  nationality: string;        // เช่น ไทย, เกาหลี, ญี่ปุ่น, ฝรั่งเศส, ลูกครึ่งไทย-ยุโรป
+  ethnicity: string;          // Thai, East Asian, Caucasian, Eurasian, etc.
+  age: number;                // 18 - 45
+  heightCm: number;           // เช่น 170 - 180 ซม.
+  bodyType: string;           // Slender runway, Petite, Curvy, Athletic
+  skinTone: string;           // Porcelain white, Warm beige, Golden tan
+  hairStyle: string;          // Sleek high ponytail, Soft romantic waves, Short bob, Elegant updo
+  hairColor: string;          // Natural black, Dark espresso brown, Honey blonde
+  vibe: string;               // Luxury high-fashion, Casual sweet, Confident businesswoman
+  avatarUrl: string;
+  isCustom?: boolean;
+}
+
+export interface ReferenceAngles {
+  front: string;              // ด้านหน้า (Required)
+  back?: string;              // ด้านหลัง (Recommended)
+  fabricZoom?: string;        // ซูมเนื้อผ้า (Optional)
+}
+
 export interface DressProject {
   id: string;
   title: string;
@@ -78,7 +100,9 @@ export interface DressProject {
   status: ProjectStatus;
   createdAt: string;
   updatedAt: string;
-  inputImages: string[];          // Base64 or object URLs of dress photos
+  inputImages: string[];          // Legacy/Fallback array
+  referenceAngles?: ReferenceAngles; // ด้านหน้า, ด้านหลัง, ซูมเนื้อผ้า
+  modelPersona?: ModelPersona;       // นางแบบที่เลือกใช้
   garmentDna?: GarmentDNA;
   iterations: VideoIteration[];
   revisionMemories: RevisionMemory[];

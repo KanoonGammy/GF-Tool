@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DressProject, GarmentDNA, RevisionMemory } from '../types';
 import { compileFlowPrompt } from '../services/flowPromptCompiler';
-import { Copy, Check, Sparkles, Video, Volume2, ShieldCheck, ExternalLink, Upload, Film } from 'lucide-react';
+import { Copy, Check, Sparkles, Video, Volume2, ShieldCheck, ExternalLink, Upload, Film, User, Layers, Info } from 'lucide-react';
 
 interface GoogleFlowPromptCardProps {
   project: DressProject;
@@ -18,6 +18,7 @@ export const GoogleFlowPromptCard: React.FC<GoogleFlowPromptCardProps> = ({
 }) => {
   const [copiedPos, setCopiedPos] = useState(false);
   const [copiedNeg, setCopiedNeg] = useState(false);
+  const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [videoInputUrl, setVideoInputUrl] = useState('');
   const [isAttachingVideo, setIsAttachingVideo] = useState(false);
 
@@ -35,6 +36,12 @@ export const GoogleFlowPromptCard: React.FC<GoogleFlowPromptCardProps> = ({
     setTimeout(() => setCopiedNeg(false), 2000);
   };
 
+  const handleCopySingleToken = (token: string) => {
+    navigator.clipboard.writeText(token);
+    setCopiedToken(token);
+    setTimeout(() => setCopiedToken(null), 1500);
+  };
+
   const handleAttachVideo = (e: React.FormEvent) => {
     e.preventDefault();
     if (!videoInputUrl.trim()) return;
@@ -48,6 +55,11 @@ export const GoogleFlowPromptCard: React.FC<GoogleFlowPromptCardProps> = ({
     setIsAttachingVideo(false);
   };
 
+  const frontImg = project.referenceAngles?.front || project.inputImages?.[0];
+  const backImg = project.referenceAngles?.back || project.inputImages?.[1];
+  const fabricImg = project.referenceAngles?.fabricZoom;
+  const model = project.modelPersona;
+
   return (
     <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
       
@@ -59,13 +71,13 @@ export const GoogleFlowPromptCard: React.FC<GoogleFlowPromptCardProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-base text-white">Google Flow Director & Prompt Studio</h3>
+              <h3 className="font-extrabold text-base text-white">Google Flow (Omni-Flash 1.1) Video Studio</h3>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                Omni-Flash 10s • 9:16
+                10s • 9:16 Vertical
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              สังเคราะห์คำสั่งพร้อม [VOICEOVER], [SFX], [BGM] และชุดคำสั่งห้าม (Negative Matrix) จากความจำ AI
+              ขับเคลื่อนโดย Gemini 2.5 Brain (วิเคราะห์ DNA + คุมความจำ) ส่งเข้า Google Flow Omni-Flash (เรนเดอร์คลิป + เสียงไทย + SFX)
             </p>
           </div>
         </div>
@@ -79,6 +91,91 @@ export const GoogleFlowPromptCard: React.FC<GoogleFlowPromptCardProps> = ({
           <span>เปิด Google Flow Studio</span>
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
+      </div>
+
+      {/* Reference Cutouts & Model Persona Bar */}
+      <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-pink-400" />
+            <span>Reference Tokens ที่ต้องแนบเข้า Prompt Bar ของ Google Flow:</span>
+          </span>
+          <span className="text-[11px] text-slate-500">ลากรูปไปวางใน Google Flow ได้เลย</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          
+          {/* Front Cutout Token */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 flex items-center gap-2.5">
+            <div className="w-12 h-14 rounded-lg overflow-hidden bg-slate-950 flex-shrink-0 border border-slate-800">
+              {frontImg && <img src={frontImg} alt="front" className="w-full h-full object-cover" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-bold text-slate-200 truncate">1. ด้านหน้า</div>
+              <button
+                type="button"
+                onClick={() => handleCopySingleToken('@dress_front_cutout')}
+                className="text-[10px] text-pink-400 font-mono hover:underline flex items-center gap-0.5 mt-0.5"
+              >
+                <span>{copiedToken === '@dress_front_cutout' ? 'คัดลอกแล้ว' : '@dress_front_cutout'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Back Cutout Token */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 flex items-center gap-2.5">
+            <div className="w-12 h-14 rounded-lg overflow-hidden bg-slate-950 flex-shrink-0 border border-slate-800">
+              {backImg ? (
+                <img src={backImg} alt="back" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-600">-</div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-bold text-slate-200 truncate">2. ด้านหลัง</div>
+              <button
+                type="button"
+                onClick={() => handleCopySingleToken('@dress_back_cutout')}
+                className="text-[10px] text-pink-400 font-mono hover:underline flex items-center gap-0.5 mt-0.5"
+              >
+                <span>{copiedToken === '@dress_back_cutout' ? 'คัดลอกแล้ว' : '@dress_back_cutout'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Fabric Zoom Token */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 flex items-center gap-2.5">
+            <div className="w-12 h-14 rounded-lg overflow-hidden bg-slate-950 flex-shrink-0 border border-slate-800">
+              {fabricImg ? (
+                <img src={fabricImg} alt="fabric" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-600">-</div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-bold text-slate-200 truncate">3. ซูมเนื้อผ้า</div>
+              <button
+                type="button"
+                onClick={() => handleCopySingleToken('@fabric_zoom_cutout')}
+                className="text-[10px] text-pink-400 font-mono hover:underline flex items-center gap-0.5 mt-0.5"
+              >
+                <span>{copiedToken === '@fabric_zoom_cutout' ? 'คัดลอกแล้ว' : '@fabric_zoom_cutout'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Model Persona Token */}
+          <div className="bg-slate-900 border border-purple-500/30 rounded-xl p-2.5 flex items-center gap-2.5">
+            <div className="w-12 h-14 rounded-lg overflow-hidden bg-slate-950 flex-shrink-0 border border-purple-400/40">
+              {model?.avatarUrl && <img src={model.avatarUrl} alt="model" className="w-full h-full object-cover" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-bold text-purple-300 truncate">4. {model ? model.name : 'นางแบบ'}</div>
+              <div className="text-[10px] text-slate-400 truncate">{model ? `${model.heightCm}cm ${model.nationality}` : 'สแตนดาร์ด'}</div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       {/* Rules Applied from Past Memory Alert */}
@@ -128,7 +225,7 @@ export const GoogleFlowPromptCard: React.FC<GoogleFlowPromptCardProps> = ({
               </button>
             </div>
 
-            <pre className="text-[11px] text-slate-300 bg-slate-900/90 border border-slate-800/80 rounded-xl p-3 h-48 overflow-y-auto whitespace-pre-wrap font-sans leading-relaxed">
+            <pre className="text-[11px] text-slate-300 bg-slate-900/90 border border-slate-800/80 rounded-xl p-3 h-52 overflow-y-auto whitespace-pre-wrap font-sans leading-relaxed">
               {compiled.positivePrompt}
             </pre>
           </div>
@@ -165,7 +262,7 @@ export const GoogleFlowPromptCard: React.FC<GoogleFlowPromptCardProps> = ({
               </button>
             </div>
 
-            <div className="text-[11px] text-rose-200/90 bg-rose-950/20 border border-rose-900/40 rounded-xl p-3 h-48 overflow-y-auto font-mono leading-relaxed">
+            <div className="text-[11px] text-rose-200/90 bg-rose-950/20 border border-rose-900/40 rounded-xl p-3 h-52 overflow-y-auto font-mono leading-relaxed">
               {compiled.negativePrompt}
             </div>
           </div>

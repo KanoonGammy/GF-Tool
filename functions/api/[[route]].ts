@@ -10,6 +10,8 @@ interface Env {
   APP_PASSCODE?: string;
 }
 
+type PagesFunction<T = any> = (context: { request: Request; env: T }) => Promise<Response> | Response;
+
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
