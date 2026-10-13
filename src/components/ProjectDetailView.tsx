@@ -5,7 +5,7 @@ import { GoogleFlowPromptCard } from './GoogleFlowPromptCard';
 import { GarmentDnaView } from './GarmentDnaView';
 import { CumulativeMemoryTimeline } from './CumulativeMemoryTimeline';
 import { RevisionModal } from './RevisionModal';
-import { ArrowLeft, Video, Sparkles, BrainCircuit, ShieldCheck, Film, Layers, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Video, Sparkles, BrainCircuit, ShieldCheck, Film, Layers, CheckCircle2, ChevronRight, User } from 'lucide-react';
 import { ProjectStorage } from '../lib/storage';
 
 interface ProjectDetailViewProps {
@@ -19,7 +19,15 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   onBack,
   onUpdateProject
 }) => {
-  const [activeTab, setActiveTab] = useState<'review' | 'flow' | 'dna' | 'memory'>('review');
+  // Determine smart default tab based on project lifecycle
+  const getInitialTab = (): 'dna' | 'flow' | 'review' | 'memory' => {
+    if (project.status === 'ready_for_review') return 'review';
+    if (project.status === 'revision_requested') return 'flow';
+    if (project.status === 'approved') return 'review';
+    return 'dna'; // Default starting point: Review DNA & Model specs!
+  };
+
+  const [activeTab, setActiveTab] = useState<'dna' | 'flow' | 'review' | 'memory'>(getInitialTab());
   const [selectedIterationIndex, setSelectedIterationIndex] = useState<number>(
     project.iterations && project.iterations.length > 0 ? project.iterations.length - 1 : 0
   );
@@ -90,7 +98,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     ProjectStorage.saveProject(updatedProj);
     onUpdateProject(updatedProj);
     setSelectedIterationIndex(updatedIterations.length - 1);
-    setActiveTab('flow'); // Take user to Google Flow prompt studio to copy the new refined prompt!
+    setActiveTab('flow'); // Flow Step 2: Go to Google Flow prompt studio to copy the new refined prompt!
   };
 
   // Handler for updating Garment DNA
@@ -135,7 +143,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
 
     ProjectStorage.saveProject(updatedProj);
     onUpdateProject(updatedProj);
-    setActiveTab('review'); // Take user to Review room!
+    setActiveTab('review'); // Take user forward to Step 3: DoD Review Room!
   };
 
   return (
@@ -162,7 +170,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
               )}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              หมวดหมู่: <span className="text-slate-200 capitalize">{project.category.replace('_', ' ')}</span> • กลุ่มเป้าหมาย: <span className="text-slate-200">{project.targetAudience}</span>
+              หมวดหมู่: <span className="text-slate-200 capitalize">{project.category.replace('_', ' ')}</span> • นางแบบ: <span className="text-pink-300 font-semibold">{project.modelPersona ? `${project.modelPersona.name} (${project.modelPersona.nationality})` : 'มาตรฐาน'}</span>
             </p>
           </div>
         </div>
@@ -188,68 +196,80 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         )}
       </div>
 
-      {/* Main Tabs Navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('review')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition ${
-            activeTab === 'review'
-              ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-500/20'
-              : 'text-slate-400 hover:text-white hover:bg-slate-900'
-          }`}
-        >
-          <Video className="w-4 h-4" />
-          <span>1. ตรวจรับงาน Definition of Done</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('flow')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition ${
-            activeTab === 'flow'
-              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
-              : 'text-slate-400 hover:text-white hover:bg-slate-900'
-          }`}
-        >
-          <Film className="w-4 h-4" />
-          <span>2. Google Flow Studio & Prompts</span>
-        </button>
-
+      {/* Logical Step Pipeline Tabs Navigation (ตามลำดับการทำงานจริง) */}
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto">
+        
+        {/* Step 1: Garment DNA & Model */}
         <button
           onClick={() => setActiveTab('dna')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition ${
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
             activeTab === 'dna'
               ? 'bg-gradient-to-r from-indigo-500 to-blue-600 text-white shadow-lg shadow-indigo-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-900'
           }`}
         >
           <Sparkles className="w-4 h-4" />
-          <span>3. Garment DNA Passport</span>
+          <span>Step 1: พาสปอร์ตชุด & นางแบบ (DNA)</span>
         </button>
 
+        <ChevronRight className="w-4 h-4 text-slate-600 flex-shrink-0" />
+
+        {/* Step 2: Google Flow Studio & Prompts */}
+        <button
+          onClick={() => setActiveTab('flow')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
+            activeTab === 'flow'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <Film className="w-4 h-4" />
+          <span>Step 2: Google Flow Studio & Prompts</span>
+        </button>
+
+        <ChevronRight className="w-4 h-4 text-slate-600 flex-shrink-0" />
+
+        {/* Step 3: Definition of Done Review Room */}
+        <button
+          onClick={() => setActiveTab('review')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
+            activeTab === 'review'
+              ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-500/20'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <Video className="w-4 h-4" />
+          <span>Step 3: ตรวจรับงาน Definition of Done</span>
+        </button>
+
+        <ChevronRight className="w-4 h-4 text-slate-600 flex-shrink-0" />
+
+        {/* Step 4: AI Cumulative Memory Bank */}
         <button
           onClick={() => setActiveTab('memory')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition ${
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
             activeTab === 'memory'
               ? 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-lg shadow-teal-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-900'
           }`}
         >
           <BrainCircuit className="w-4 h-4" />
-          <span>4. คลังความจำ AI ({project.revisionMemories?.length || 0})</span>
+          <span>Step 4: คลังความจำ AI ({project.revisionMemories?.length || 0})</span>
         </button>
+
       </div>
 
       {/* Tab Panels */}
       <div>
-        {activeTab === 'review' && (
-          <VideoReviewRoom
-            project={project}
-            currentIteration={currentIteration}
-            onAccept={handleAcceptDoD}
-            onRequestRevision={() => setIsRevisionModalOpen(true)}
+        {/* Step 1: Garment DNA Passport */}
+        {activeTab === 'dna' && project.garmentDna && (
+          <GarmentDnaView
+            dna={project.garmentDna}
+            onUpdateDna={handleUpdateDna}
           />
         )}
 
+        {/* Step 2: Google Flow Studio */}
         {activeTab === 'flow' && project.garmentDna && (
           <GoogleFlowPromptCard
             project={project}
@@ -259,13 +279,17 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           />
         )}
 
-        {activeTab === 'dna' && project.garmentDna && (
-          <GarmentDnaView
-            dna={project.garmentDna}
-            onUpdateDna={handleUpdateDna}
+        {/* Step 3: Video Review Room (Definition of Done) */}
+        {activeTab === 'review' && (
+          <VideoReviewRoom
+            project={project}
+            currentIteration={currentIteration}
+            onAccept={handleAcceptDoD}
+            onRequestRevision={() => setIsRevisionModalOpen(true)}
           />
         )}
 
+        {/* Step 4: AI Cumulative Memory Bank */}
         {activeTab === 'memory' && (
           <CumulativeMemoryTimeline
             memories={project.revisionMemories || []}
