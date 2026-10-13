@@ -5,6 +5,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    host: true
+    host: true,
+    proxy: {
+      '/api/flow': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      }
+    }
   }
 });

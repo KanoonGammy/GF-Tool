@@ -11,6 +11,7 @@ import { PersistentReferenceSidebar } from './PersistentReferenceSidebar';
 import { ArchetypeKnowledgeManager } from '../lib/archetypeKnowledge';
 import { ArrowLeft, Video, Sparkles, BrainCircuit, ShieldCheck, Film, Layers, CheckCircle2, ChevronRight, User, BookOpen } from 'lucide-react';
 import { ProjectStorage } from '../lib/storage';
+import { FlowService } from '../services/flowService';
 
 interface ProjectDetailViewProps {
   project: DressProject;
@@ -41,15 +42,62 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     createdAt: new Date().toISOString()
   };
 
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
+  const [videoGenStatusMessage, setVideoGenStatusMessage] = useState<string>('');
+  const [videoGenError, setVideoGenError] = useState<string | null>(null);
+
   // Handler for Proceeding to Video Generation from Storyboard
-  const handleProceedToVideoGeneration = (positivePrompt: string, negativePrompt: string) => {
-    // Generate new iteration and switch to DoD Review room!
+  const handleProceedToVideoGeneration = async (positivePrompt: string, negativePrompt: string) => {
+    setIsGeneratingVideo(true);
+    setVideoGenError(null);
+    setVideoGenStatusMessage('กำลังส่งคำสั่งเข้า Google Flow Omni-Flash (10s Vertical)...');
+
     const nextIterationNum = (project.iterations?.length || 0) + 1;
+    let finalVideoUrl = '';
+
+    try {
+      // 1. Submit to FlowKit / Google Flow
+      const job = await FlowService.generateOmniVideo(positivePrompt);
+      setVideoGenStatusMessage('ส่งงานสำเร็จ! กำลังรอ Google Flow เรนเดอร์วิดีโอ (ใช้เวลาประมาณ 1-2 นาที)...');
+
+      // 2. Poll for completion
+      const startTime = Date.now();
+      let completedUrl = '';
+      
+      while (Date.now() - startTime < 300000) { // max 5 min
+        await new Promise(r => setTimeout(r, 8000)); // wait 8s between polls
+        const pollResult = await FlowService.checkStatus(job);
+        
+        if (pollResult.done) {
+          if (pollResult.error) {
+            throw new Error(`Google Flow รายงานข้อผิดพลาด: ${pollResult.error}`);
+          }
+          if (pollResult.url) {
+            completedUrl = pollResult.url;
+            break;
+          }
+        }
+      }
+
+      if (!completedUrl) {
+        throw new Error('หมดเวลารอเรนเดอร์ (Timeout) โปรดตรวจสอบที่แท็บ Google Flow ใน Chrome');
+      }
+
+      finalVideoUrl = completedUrl;
+    } catch (err: any) {
+      console.error('Video generation error:', err);
+      setVideoGenError(err.message || 'ไม่สามารถเรนเดอร์วิดีโอบน Google Flow ได้');
+      // If error occurs, fallback to preview and let user inspect error
+      finalVideoUrl = project.iterations?.[0]?.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-fashion-model-in-a-pink-dress-posing-40742-large.mp4';
+    } finally {
+      setIsGeneratingVideo(false);
+    }
+
     const newIteration: VideoIteration = {
       id: `iter-${Date.now()}`,
       iterationNumber: nextIterationNum,
-      videoUrl: project.iterations?.[0]?.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-fashion-model-in-a-pink-dress-posing-40742-large.mp4',
-      coverImageUrl: project.iterations?.[0]?.coverImageUrl || '/samples/pomelo_model_wearing.jpg',
+      videoUrl: finalVideoUrl,
+      coverImageUrl: project.masterKeyframeUrl || project.iterations?.[0]?.coverImageUrl || '/samples/pomelo_model_wearing.jpg',
       positivePrompt,
       negativePrompt,
       durationSeconds: 10,
@@ -326,6 +374,42 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         </div>
 
       </div>
+
+      {/* Video Generation Progress Modal */}
+      {isGeneratingVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 text-center space-y-4 shadow-2xl">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-500 to-indigo-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-pink-500/30">
+              <Film className="w-8 h-8 animate-pulse text-white" />
+            </div>
+            <h3 className="text-lg font-black text-white">กำลังสร้างวิดีโอบน Google Flow</h3>
+            <p className="text-xs text-slate-300 leading-relaxed font-medium">
+              {videoGenStatusMessage}
+            </p>
+            <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-[11px] text-slate-400">
+              ⚡ โมเดล: Gemini Omni Flash 1.1 • 10 วินาที • อัตราส่วน 9:16 แนวตั้ง
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Generation Error Banner */}
+      {videoGenError && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md p-4 rounded-2xl bg-rose-950 border border-rose-800 shadow-2xl space-y-2">
+          <div className="flex items-center justify-between text-xs font-bold text-rose-200">
+            <span>⚠️ ไม่สามารถเรนเดอร์วิดีโอจาก Flow ได้</span>
+            <button onClick={() => setVideoGenError(null)} className="text-rose-400 hover:text-white text-xs">✕</button>
+          </div>
+          <p className="text-[11px] text-rose-300 leading-relaxed">
+            {videoGenError}
+          </p>
+          {videoGenError.includes('NO_FLOW_PROJECT') && (
+            <div className="p-2 rounded-lg bg-black/40 text-[10px] text-slate-300">
+              💡 <strong>คำแนะนำ:</strong> ในหน้า Google Flow บน Chrome กรุณากดคลิกเปิดโปรเจกต์ใดโปรเจกต์หนึ่ง (หรือกด + New Project) เพื่อให้ได้ Project ID ครับ
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Revision Modal */}
       {project.garmentDna && (

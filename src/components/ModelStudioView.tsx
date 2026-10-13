@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ModelPersona, DressProject } from '../types';
 import { PRESET_MODELS } from '../lib/modelLibrary';
+import { FlowService } from '../services/flowService';
 import { 
   UserCheck, Sparkles, Upload, Check, Wand2, RefreshCw, 
   Camera, Sliders, Globe, Heart, ShieldCheck, ArrowRight, Lock, Eye
@@ -55,16 +56,26 @@ export const ModelStudioView: React.FC<ModelStudioViewProps> = ({
   };
 
   // Handle AI Model Generation
-  const handleGenerateAiModel = (e: React.FormEvent) => {
+  const [genError, setGenError] = useState<string | null>(null);
+
+  const handleGenerateAiModel = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
+    setGenError(null);
 
-    // Simulate AI generation completion (or use existing high-fashion sample)
-    setTimeout(() => {
-      const generatedAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80';
-      setGeneratedPreviewUrl(generatedAvatar);
+    const prompt = `A breathtaking, hyper-realistic 9:16 vertical fashion commercial portrait of a ${genAge}-year-old ${genNationality} fashion model named '${genName.trim()}'. ${genHeight}cm tall, ${genBodyType}. Skin tone: ${genSkinTone}. Hair styled in an ${genHairStyle}, hair color: ${genHairColor}. Vibe: ${genVibe}. Looking directly into the camera lens with warm confident eyes, neutral minimal fashion studio background, 35mm Arri Alexa fashion photography, sharp 8k resolution, raw editorial commercial quality.`;
+
+    try {
+      const res = await FlowService.generateImage(prompt);
+      if (res && res.url) {
+        setGeneratedPreviewUrl(res.url);
+      }
+    } catch (err: any) {
+      console.error('Flow generation error:', err);
+      setGenError(err.message || 'การเชื่อมต่อ Google Flow ล้มเหลว โปรดตรวจสอบว่าคลิกเข้าโปรเจกต์ใน Google Flow ไว้แล้ว');
+    } finally {
       setIsGenerating(false);
-    }, 1000);
+    }
   };
 
   const handleApplyGeneratedModel = () => {
@@ -409,13 +420,25 @@ export const ModelStudioView: React.FC<ModelStudioViewProps> = ({
                 </div>
               </div>
 
+              {genError && (
+                <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-900/60 text-rose-300 text-xs text-left leading-relaxed">
+                  <div className="font-bold text-rose-200 mb-1">⚠️ แจ้งเตือนข้อผิดพลาด:</div>
+                  {genError}
+                  {genError.includes('NO_FLOW_PROJECT') && (
+                    <div className="mt-2 text-[11px] text-slate-300 bg-slate-900/80 p-2 rounded-lg border border-slate-800">
+                      💡 <strong>วิธีแก้:</strong> สลับไปที่แท็บ Chrome ของ Google Flow แล้วคลิกเปิดโปรเจกต์ใดโปรเจกต์หนึ่ง (หรือกด + New Project) เพื่อให้ FlowKit ตรวจจับ Project ID ครับ!
+                    </div>
+                  )}
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={isGenerating}
                 className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-500/25 transition disabled:opacity-40"
               >
                 {isGenerating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                <span>{isGenerating ? 'กำลังสร้างภาพพอร์ตเทรตนางแบบ...' : '⚡ สั่งเจนรูปพอร์ตเทรตนางแบบด้วย AI (Nano Banana Pro)'}</span>
+                <span>{isGenerating ? 'กำลังสร้างภาพพอร์ตเทรตนางแบบบน Google Flow...' : '⚡ สั่งเจนรูปพอร์ตเทรตนางแบบด้วย AI (Nano Banana Pro)'}</span>
               </button>
 
             </div>
