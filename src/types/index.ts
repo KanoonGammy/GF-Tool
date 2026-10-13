@@ -134,6 +134,24 @@ export interface ReferenceAngles {
   fabricZoom?: string;        // ซูมเนื้อผ้า (Optional)
 }
 
+export type CommercialVisualEffectType = 
+  | 'none'
+  | 'anime_cel_shade'
+  | 'sparkle_shimmer'
+  | 'korean_dreamy_bloom'
+  | 'y2k_strobe_flash'
+  | 'speed_ramp_hook';
+
+export interface CommercialVisualEffect {
+  id: CommercialVisualEffectType;
+  name: string;             // ชื่อเอฟเฟกต์ภาษาไทย
+  subtitle: string;         // คำอธิบายสั้นๆ
+  tag: string;              // แทร็กสั้นๆ
+  promptDirective: string;  // คำสั่งที่แทรกลงใน Positive Prompt
+  negativeDirective?: string;
+  sfxCue: string;           // ซาวด์เอฟเฟกต์ที่ซิงก์กัน
+}
+
 export interface DressProject {
   id: string;
   title: string;
@@ -146,6 +164,8 @@ export interface DressProject {
   inputImages: string[];          // Legacy/Fallback array
   referenceAngles?: ReferenceAngles; // ด้านหน้า, ด้านหลัง, ซูมเนื้อผ้า
   modelPersona?: ModelPersona;       // นางแบบที่เลือกใช้
+  masterKeyframeUrl?: string;        // ภาพหน้าตรงหลัก (Master Frontal Anchor Plate)
+  activeVisualEffect?: CommercialVisualEffectType; // เอฟเฟกต์เสริมสำหรับขายของ
   garmentDna?: GarmentDNA;
   storyboard?: StoryboardShot[];     // 6-shot (2x3) visual storyboard
   promptDiffHistory?: PromptDiff[];  // ประวัติการแก้ไขสิ่งที่เพิ่ม/ตัดออก

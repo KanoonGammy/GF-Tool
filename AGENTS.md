@@ -35,14 +35,23 @@ flowchart TD
   - Query `wiki/concepts/garment-archetypes/` for known caution rules before generating prompts.
 
 ### 2. Storyboard & Prompt Director Agent (The Core Screen)
-- **Role**: Builds the 6-shot (2x3 grid) visual storyboard and compiles the unified Omni-Flash prompt.
+- **Role**: Establishes the Master Frontal Anchor plate, builds the 6-shot (2x3 grid) visual storyboard, and compiles the unified Omni-Flash prompt.
+- **Rule of Master Frontal Anchor Plate**:
+  - Always generate/lock the Master Frontal Keyframe plate first with the model wearing the garment front-facing.
+  - Locks facial bone structure, warm honey beige skin tone, and sleek low bun hairstyle before branching into shots.
+- **Strict Front-Only Rule (⭐ × 1,000,000)**:
+  - If `@dress_back_cutout` is NOT provided by the user, **STRICTLY PROHIBIT 360° SPINS OR REAR SHOTS**.
+  - Camera must stay within frontal arc (±35°). Shot 6 must be a **Frontal Hero Brand Poise**.
+  - Negative prompt must forbid: `back view, rear view, 360 spin, turning back, showing backside, hallucinated back details`.
+- **Commercial Visual Effects Integration**:
+  - Supports high-converting e-commerce effects: *Pure Editorial*, *Anime 2.5D Warp Glow*, *Diamond Shimmer*, *Korean Soft Bloom*, *Y2K Strobe Flash*, and *Speed Ramp Hook* with synchronized audio SFX.
 - **2x3 Storyboard Grid Standard**:
-  - **Shot 1 (00-02s)**: Opening 3D Orbit & Full Silhouette uncropped (`@dress_front_cutout`).
+  - **Shot 1 (00-02s)**: Opening Frontal Orbit & Full Silhouette uncropped (`@dress_front_cutout`).
   - **Shot 2 (02-04s)**: Chest, Collar & Neckline Detail.
   - **Shot 3 (04-06s)**: Macro Texture Zoom & Intarsia/Fabric Weave (`@fabric_zoom_cutout`).
   - **Shot 4 (06-07s)**: Sleeve Cuffs, Hemline Ribbing & Waist Detail.
-  - **Shot 5 (07-09s)**: Runway Walking & Dynamic Poise (no violent arm swings).
-  - **Shot 6 (09-10s)**: 360 Turn displaying back drapery (`@dress_back_cutout`) & Brand Outro.
+  - **Shot 5 (07-09s)**: Runway Walking Toward Camera & Dynamic Poise (no violent arm swings).
+  - **Shot 6 (09-10s)**: Frontal Hero Poise (สบตากล้องหน้าตรง) if Front-Only, or 360 Turn only if `@dress_back_cutout` exists.
 - **Feedback & Diff Loop**:
   - When user dislikes a prompt or storyboard, the agent must output a clear **Diff**:
     - 🟢 `Added`: What new tokens/directives were introduced.

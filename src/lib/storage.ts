@@ -1,7 +1,7 @@
 import { DressProject, UserSession } from '../types';
 import { PRESET_MODELS } from './modelLibrary';
 
-const STORAGE_KEY = 'fashion_dresses_projects_v4'; // Bump key so fresh real images load immediately
+const STORAGE_KEY = 'fashion_dresses_projects_v5'; // Bump key so Frontal Hero shot & Master Anchor load
 const USER_KEY = 'fashion_dresses_user_session';
 const PASSCODE_KEY = 'fashion_app_passcode';
 
@@ -19,13 +19,15 @@ export const POMELO_KNIT_PROJECT: DressProject = {
   status: 'ready_for_review',
   createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
   updatedAt: new Date().toISOString(),
+  masterKeyframeUrl: '/samples/pomelo_model_wearing.jpg',
+  activeVisualEffect: 'none',
   inputImages: [
     '/samples/pomelo_knit_top.png',
     '/samples/pomelo_model_wearing.jpg'
   ],
   referenceAngles: {
     front: '/samples/pomelo_knit_top.png',
-    back: '/samples/pomelo_knit_top.png',
+    // No back reference provided -> STRICT FRONT-ONLY MODE ACTIVATED
     fabricZoom: '/samples/pomelo_knit_top.png'
   },
   modelPersona: PRESET_MODELS[0], // น้องมินท์ (Mint) - สาวไทย 24 ปี
@@ -33,9 +35,9 @@ export const POMELO_KNIT_PROJECT: DressProject = {
     {
       shotNumber: 1,
       timecode: '00:00 - 00:02',
-      title: 'ช็อตเปิดตัว: 3D Orbit รอบตัวเสื้อทั้งตัว',
-      shotType: 'Full Body 3D Orbit (Uncropped)',
-      description: 'กล้องหมุน 3D Orbit รอบตัว น้องมินท์ เผยสัดส่วนชุดทั้งตัว ไม่ตัดขอบใน Safe zone 9:16',
+      title: 'ช็อตเปิดตัว: 3D Frontal Orbit (ครึ่งวงกลมด้านหน้า)',
+      shotType: 'Frontal Orbit (±30° Safe Zone)',
+      description: 'กล้องหมุน Frontal Orbit อย่างนุ่มนวลรอบตัว น้องมินท์ เผยสัดส่วนชุดทั้งตัว ไม่ตัดขอบใน Safe zone 9:16',
       refToken: '@dress_front_cutout',
       focusArea: 'โครงสร้างชุดทั้งตัว และสัดส่วนเอว',
       imageUrl: '/samples/storyboard/shot1.jpg'
@@ -73,9 +75,9 @@ export const POMELO_KNIT_PROJECT: DressProject = {
     {
       shotNumber: 5,
       timecode: '00:07 - 00:09',
-      title: 'จังหวะการเดิน: โมเดลเดิน Runway อย่างสง่า',
-      shotType: 'Dynamic Runway Walk (Slow Motion)',
-      description: 'น้องมินท์ ก้าวเดินด้วยความมั่นใจ จังหวะก้าวสง่างาม ท่วงท่าไม่เหวี่ยงแขนจนบดบังดีเทลของตัวเสื้อ',
+      title: 'จังหวะการเดิน: โมเดลเดิน Runway มุ่งตรงมาข้างหน้า',
+      shotType: 'Dynamic Runway Walk (Front-Facing)',
+      description: 'น้องมินท์ ก้าวเดินตรงเข้าหากล้องอย่างสง่างาม ท่วงท่าไม่เหวี่ยงแขนจนบดบังดีเทลของตัวเสื้อ',
       refToken: '@model_persona',
       focusArea: 'การทิ้งตัวของผ้าตามจังหวะก้าวเดิน',
       imageUrl: '/samples/storyboard/shot5.jpg'
@@ -83,11 +85,11 @@ export const POMELO_KNIT_PROJECT: DressProject = {
     {
       shotNumber: 6,
       timecode: '00:09 - 00:10',
-      title: 'ช็อตจบ: หมุนตัว 360 องศา โชว์ด้านหลัง & ปิดแอด',
-      shotType: '360 Spin Turn & Brand Outro',
-      description: 'น้องมินท์ หมุนตัวช้าๆ โชว์ดีเทลด้านหลัง ลายแฟร์ไอล์พาดผ่านช่วงไหล่ พร้อมแบรนด์เอาต์โทร',
-      refToken: '@dress_back_cutout',
-      focusArea: 'ด้านหลังตัวเสื้อ และความประทับใจสุดท้าย',
+      title: 'ช็อตจบ: ท่าโพสหน้าตรงสง่างาม สบตากล้อง & ปิดแอด',
+      shotType: 'Frontal Hero Poise (ห้ามหันหลัง)',
+      description: 'น้องมินท์ ยืนโพสหน้าตรงอย่างมั่นใจ สบตากล้องอย่างสง่างาม ล็อคดีเทลหน้าเสื้อชัดเจน 100% ห้ามหันหลังเพื่อป้องกันรายละเอียดเพี้ยน',
+      refToken: '@dress_front_cutout',
+      focusArea: 'ด้านหน้าตัวเสื้อ และสายตาสะกดใจ',
       imageUrl: '/samples/storyboard/shot6.jpg'
     }
   ],
