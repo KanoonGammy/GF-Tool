@@ -13,7 +13,8 @@ export function generateDefaultStoryboard(project: DressProject, dna: GarmentDNA
       shotType: 'Full Body 3D Orbit (Uncropped)',
       description: `กล้องหมุน 3D Orbit อย่างนุ่มนวลรอบตัว ${modelName} เผยให้เห็นสัดส่วนชุดทั้งตัว ไม่ตัดขอบ ปลอดภัยใน Safe zone 9:16`,
       refToken: '@dress_front_cutout',
-      focusArea: 'โครงสร้างชุดทั้งตัว และสัดส่วนเอว'
+      focusArea: 'โครงสร้างชุดทั้งตัว และสัดส่วนเอว',
+      imageUrl: '/samples/storyboard/shot1.jpg'
     },
     {
       shotNumber: 2,
@@ -22,7 +23,8 @@ export function generateDefaultStoryboard(project: DressProject, dna: GarmentDNA
       shotType: 'Medium Close-up (Chest & Neckline)',
       description: `กล้อง Push-in เข้าหาช่วงอกและคอเสื้อ ล็อคทรง ${dna.silhouette.neckline} แน่นหนา ไม่ morphing ระหว่างการขยับตัว`,
       refToken: '@dress_front_cutout',
-      focusArea: `${dna.silhouette.neckline} และแถบสี`
+      focusArea: `${dna.silhouette.neckline} และแถบสี`,
+      imageUrl: '/samples/storyboard/shot2.jpg'
     },
     {
       shotNumber: 3,
@@ -31,7 +33,8 @@ export function generateDefaultStoryboard(project: DressProject, dna: GarmentDNA
       shotType: 'Extreme Macro Texture Zoom',
       description: `กล้อง Macro ซูมลึกระดับเส้นใย ${dna.fabricType} ให้เห็นมิติความนุ่ม ลายทอดอกไม้ และการสะท้อนแสงแบบธรรมชาติ`,
       refToken: hasZoom ? '@fabric_zoom_cutout' : '@dress_front_cutout',
-      focusArea: 'ผิวสัมผัสเส้นใย และลวดลายในตัวผ้า'
+      focusArea: 'ผิวสัมผัสเส้นใย และลวดลายในตัวผ้า',
+      imageUrl: '/samples/storyboard/shot3.jpg'
     },
     {
       shotNumber: 4,
@@ -40,7 +43,8 @@ export function generateDefaultStoryboard(project: DressProject, dna: GarmentDNA
       shotType: 'Waist & Sleeve Detail Framing',
       description: `กล้อง Pan ลงเบาๆ แสดงคัตติ้ง ${dna.silhouette.sleeves} และช่วงเอว ${dna.silhouette.waist} แนบสรีระสวยงาม`,
       refToken: '@dress_front_cutout',
-      focusArea: 'ขอบแขนเสื้อ และความเข้ารูปช่วงเอว'
+      focusArea: 'ขอบแขนเสื้อ และความเข้ารูปช่วงเอว',
+      imageUrl: '/samples/storyboard/shot4.jpg'
     },
     {
       shotNumber: 5,
@@ -49,7 +53,8 @@ export function generateDefaultStoryboard(project: DressProject, dna: GarmentDNA
       shotType: 'Dynamic Runway Walk (Slow Motion)',
       description: `${modelName} ก้าวเดินด้วยความมั่นใจ จังหวะก้าวสง่างาม ท่วงท่าไม่เหวี่ยงแขนจนบดบังดีเทลของตัวเสื้อ`,
       refToken: '@model_persona',
-      focusArea: 'การทิ้งตัวของผ้าตามจังหวะก้าวเดิน'
+      focusArea: 'การทิ้งตัวของผ้าตามจังหวะก้าวเดิน',
+      imageUrl: '/samples/storyboard/shot5.jpg'
     },
     {
       shotNumber: 6,
@@ -58,7 +63,8 @@ export function generateDefaultStoryboard(project: DressProject, dna: GarmentDNA
       shotType: '360 Spin Turn & Brand Outro',
       description: `โมเดลหมุนตัวช้าๆ โชว์ดีเทลด้านหลัง${hasBack ? ' ตามภาพ @dress_back_cutout' : ''} พร้อมเอฟเฟกต์แสงประกายปิดท้ายแบรนด์`,
       refToken: hasBack ? '@dress_back_cutout' : '@dress_front_cutout',
-      focusArea: 'ด้านหลังตัวเสื้อ และความประทับใจสุดท้าย'
+      focusArea: 'ด้านหลังตัวเสื้อ และความประทับใจสุดท้าย',
+      imageUrl: '/samples/storyboard/shot6.jpg'
     }
   ];
 }

@@ -1,7 +1,7 @@
 import { DressProject, UserSession } from '../types';
 import { PRESET_MODELS } from './modelLibrary';
 
-const STORAGE_KEY = 'fashion_dresses_projects_v2'; // Bump key so new seed loads immediately
+const STORAGE_KEY = 'fashion_dresses_projects_v4'; // Bump key so fresh real images load immediately
 const USER_KEY = 'fashion_dresses_user_session';
 const PASSCODE_KEY = 'fashion_app_passcode';
 
@@ -29,6 +29,68 @@ export const POMELO_KNIT_PROJECT: DressProject = {
     fabricZoom: '/samples/pomelo_knit_top.png'
   },
   modelPersona: PRESET_MODELS[0], // น้องมินท์ (Mint) - สาวไทย 24 ปี
+  storyboard: [
+    {
+      shotNumber: 1,
+      timecode: '00:00 - 00:02',
+      title: 'ช็อตเปิดตัว: 3D Orbit รอบตัวเสื้อทั้งตัว',
+      shotType: 'Full Body 3D Orbit (Uncropped)',
+      description: 'กล้องหมุน 3D Orbit รอบตัว น้องมินท์ เผยสัดส่วนชุดทั้งตัว ไม่ตัดขอบใน Safe zone 9:16',
+      refToken: '@dress_front_cutout',
+      focusArea: 'โครงสร้างชุดทั้งตัว และสัดส่วนเอว',
+      imageUrl: '/samples/storyboard/shot1.jpg'
+    },
+    {
+      shotNumber: 2,
+      timecode: '00:02 - 00:04',
+      title: 'เจาะดีเทล: ทรงคอเสื้อ & ขอบริบพรีเมียม',
+      shotType: 'Medium Close-up (Chest & Neckline)',
+      description: 'กล้อง Push-in เข้าหาช่วงอกและคอเสื้อ ล็อคทรงขอบริบสีฟ้าพาสเทลแน่นหนา ไม่ morphing',
+      refToken: '@dress_front_cutout',
+      focusArea: 'ขอบริบคอกลมสีฟ้าพาสเทล',
+      imageUrl: '/samples/storyboard/shot2.jpg'
+    },
+    {
+      shotNumber: 3,
+      timecode: '00:04 - 00:06',
+      title: 'ช็อตมาโคร: ส่องเนื้อผ้า & เทคนิคการทอลวดลาย',
+      shotType: 'Extreme Macro Texture Zoom',
+      description: 'กล้อง Macro ซูมลึกระดับเส้นใยผ้านิตไหมพรมคอตตอนเบลนด์ทอละเอียด ลายดอกไม้สีชมพู',
+      refToken: '@fabric_zoom_cutout',
+      focusArea: 'ผิวสัมผัสเส้นใย และลวดลายในตัวผ้า',
+      imageUrl: '/samples/storyboard/shot3.jpg'
+    },
+    {
+      shotNumber: 4,
+      timecode: '00:06 - 00:07',
+      title: 'ดีเทลคัตติ้ง: ทรงแขนเสื้อ & ช่วงเอวเข้ารูป',
+      shotType: 'Waist & Sleeve Detail Framing',
+      description: 'กล้อง Pan แสดงคัตติ้งแขนสั้นเหนือข้อศอก ขอบริบสีฟ้า และเอวกระชับพอดีตัว',
+      refToken: '@dress_front_cutout',
+      focusArea: 'ขอบแขนเสื้อ และความเข้ารูปช่วงเอว',
+      imageUrl: '/samples/storyboard/shot4.jpg'
+    },
+    {
+      shotNumber: 5,
+      timecode: '00:07 - 00:09',
+      title: 'จังหวะการเดิน: โมเดลเดิน Runway อย่างสง่า',
+      shotType: 'Dynamic Runway Walk (Slow Motion)',
+      description: 'น้องมินท์ ก้าวเดินด้วยความมั่นใจ จังหวะก้าวสง่างาม ท่วงท่าไม่เหวี่ยงแขนจนบดบังดีเทลของตัวเสื้อ',
+      refToken: '@model_persona',
+      focusArea: 'การทิ้งตัวของผ้าตามจังหวะก้าวเดิน',
+      imageUrl: '/samples/storyboard/shot5.jpg'
+    },
+    {
+      shotNumber: 6,
+      timecode: '00:09 - 00:10',
+      title: 'ช็อตจบ: หมุนตัว 360 องศา โชว์ด้านหลัง & ปิดแอด',
+      shotType: '360 Spin Turn & Brand Outro',
+      description: 'น้องมินท์ หมุนตัวช้าๆ โชว์ดีเทลด้านหลัง ลายแฟร์ไอล์พาดผ่านช่วงไหล่ พร้อมแบรนด์เอาต์โทร',
+      refToken: '@dress_back_cutout',
+      focusArea: 'ด้านหลังตัวเสื้อ และความประทับใจสุดท้าย',
+      imageUrl: '/samples/storyboard/shot6.jpg'
+    }
+  ],
   garmentDna: {
     fabricType: 'ผ้านิตไหมพรมคอตตอนเบลนด์ทอละเอียด (Fine Cotton-Blend Knit)',
     fabricPhysics: 'นุ่ม ยืดหยุ่น กระชับตามสรีระ ทิ้งตัวเบาสบาย ไม่มันเงา ผิวสัมผัสแบบ soft matte knit',

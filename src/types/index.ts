@@ -58,6 +58,7 @@ export interface StoryboardShot {
   description: string;    // Action & Camera motion
   refToken?: string;      // e.g. "@dress_front_cutout"
   focusArea: string;      // e.g. "Silhouette, Collar, Waist"
+  imageUrl?: string;       // Real generated 9:16 shot image from Nano Banana Pro
 }
 
 export interface PromptDiff {
