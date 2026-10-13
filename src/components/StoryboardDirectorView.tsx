@@ -5,7 +5,7 @@ import { compileFlowPrompt } from '../services/flowPromptCompiler';
 import { COMMERCIAL_VISUAL_EFFECTS } from '../lib/visualEffects';
 import { 
   Sparkles, Film, Check, Copy, RotateCcw, ArrowRight, 
-  Plus, Minus, Edit3, Maximize2, X, ShieldAlert, Lock, Wand2
+  Plus, Minus, Edit3, Maximize2, X, ShieldAlert, Lock, Wand2, UserCheck
 } from 'lucide-react';
 
 interface StoryboardDirectorViewProps {
@@ -13,13 +13,15 @@ interface StoryboardDirectorViewProps {
   dna: GarmentDNA;
   onProceedToVideoGeneration: (positivePrompt: string, negativePrompt: string) => void;
   onUpdateProject: (updated: DressProject) => void;
+  onOpenModelStudio?: () => void;
 }
 
 export const StoryboardDirectorView: React.FC<StoryboardDirectorViewProps> = ({
   project,
   dna,
   onProceedToVideoGeneration,
-  onUpdateProject
+  onUpdateProject,
+  onOpenModelStudio
 }) => {
   const hasBack = !!project.referenceAngles?.back;
 
@@ -157,6 +159,16 @@ export const StoryboardDirectorView: React.FC<StoryboardDirectorViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2 self-end md:self-center">
+          {onOpenModelStudio && (
+            <button
+              onClick={onOpenModelStudio}
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-indigo-600/30 hover:from-purple-600/50 hover:to-pink-600/50 text-pink-300 border border-pink-500/40 text-xs font-bold transition flex items-center gap-1.5 shadow"
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>หมวดนางแบบ (เจนใหม่ / อัปโหลด)</span>
+            </button>
+          )}
+
           <button
             onClick={() => setShowPromptDrawer(!showPromptDrawer)}
             className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"

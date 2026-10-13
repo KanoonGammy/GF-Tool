@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { DressProject, VideoIteration, DoDChecklist, RevisionMemory, GarmentDNA } from '../types';
 import { StoryboardDirectorView } from './StoryboardDirectorView';
 import { VideoReviewRoom } from './VideoReviewRoom';
+import { ModelStudioView } from './ModelStudioView';
 import { GarmentDnaView } from './GarmentDnaView';
 import { ArchetypeKnowledgeView } from './ArchetypeKnowledgeView';
 import { CumulativeMemoryTimeline } from './CumulativeMemoryTimeline';
@@ -24,7 +25,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
 }) => {
   // Determine smart default tab:
   // User explicitly requested: Storyboard Grid & Prompt loop is the MAIN SCREEN ("ตรงนี้จะเป็นหน้าหลักเลย")!
-  const [activeTab, setActiveTab] = useState<'storyboard' | 'review' | 'dna' | 'knowledge'>('storyboard');
+  const [activeTab, setActiveTab] = useState<'storyboard' | 'review' | 'model' | 'dna' | 'knowledge'>('storyboard');
   const [selectedIterationIndex, setSelectedIterationIndex] = useState<number>(
     project.iterations && project.iterations.length > 0 ? project.iterations.length - 1 : 0
   );
@@ -225,7 +226,20 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           <span>2. ตรวจรับงาน Definition of Done</span>
         </button>
 
-        {/* Tab 3: Garment DNA & Fabric/Color Scanner */}
+        {/* Tab 3: Model Studio (เลือก / เจนใหม่ / อัปโหลด) */}
+        <button
+          onClick={() => setActiveTab('model')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
+            activeTab === 'model'
+              ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white shadow-lg shadow-purple-500/25 ring-1 ring-purple-400'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <User className="w-4 h-4" />
+          <span>3. หมวดนางแบบ (Model Studio)</span>
+        </button>
+
+        {/* Tab 4: Garment DNA & Fabric/Color Scanner */}
         <button
           onClick={() => setActiveTab('dna')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
@@ -235,10 +249,10 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           }`}
         >
           <Sparkles className="w-4 h-4" />
-          <span>3. พาสปอร์ตชุด & สแกนผ้า 4 สี (DNA)</span>
+          <span>4. พาสปอร์ตชุด & สแกนผ้า 4 สี (DNA)</span>
         </button>
 
-        {/* Tab 4: AI Archetype Knowledge Base */}
+        {/* Tab 5: AI Archetype Knowledge Base */}
         <button
           onClick={() => setActiveTab('knowledge')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
@@ -248,7 +262,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>4. คลังข้อควรระวังตามประเภทเสื้อผ้า</span>
+          <span>5. คลังข้อควรระวังตามประเภทเสื้อผ้า</span>
         </button>
 
       </div>
@@ -266,6 +280,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
               dna={project.garmentDna}
               onProceedToVideoGeneration={handleProceedToVideoGeneration}
               onUpdateProject={onUpdateProject}
+              onOpenModelStudio={() => setActiveTab('model')}
             />
           )}
 
@@ -279,7 +294,16 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
             />
           )}
 
-          {/* Tab 3: Garment DNA & Fabric Scanner */}
+          {/* Tab 3: Model Studio (Preset / AI Generate / Upload) */}
+          {activeTab === 'model' && (
+            <ModelStudioView
+              project={project}
+              onUpdateProject={onUpdateProject}
+              onProceedToStoryboard={() => setActiveTab('storyboard')}
+            />
+          )}
+
+          {/* Tab 4: Garment DNA & Fabric Scanner */}
           {activeTab === 'dna' && project.garmentDna && (
             <GarmentDnaView
               dna={project.garmentDna}
@@ -287,7 +311,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
             />
           )}
 
-          {/* Tab 4: AI Archetype Knowledge Base & Timeline */}
+          {/* Tab 5: AI Archetype Knowledge Base & Timeline */}
           {activeTab === 'knowledge' && (
             <div className="space-y-6">
               <ArchetypeKnowledgeView currentCategory={project.category} />
