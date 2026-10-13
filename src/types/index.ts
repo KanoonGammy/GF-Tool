@@ -50,6 +50,24 @@ export interface GarmentDNA {
   defaultNegativePrompts: string[];// Base negative tokens
 }
 
+export interface StoryboardShot {
+  shotNumber: number;     // 1 to 6
+  timecode: string;       // e.g. "00-02s"
+  title: string;          // e.g. "Opening 3D Orbit"
+  shotType: string;       // e.g. "Full Body 360"
+  description: string;    // Action & Camera motion
+  refToken?: string;      // e.g. "@dress_front_cutout"
+  focusArea: string;      // e.g. "Silhouette, Collar, Waist"
+}
+
+export interface PromptDiff {
+  timestamp: string;
+  userComplaint: string;
+  addedTokens: string[];
+  modifiedDirectives: string[];
+  negativesAdded: string[];
+}
+
 export interface DoDChecklist {
   fabricFidelityPassed: boolean;    // ลวดลายและสีผ้าตรงต้นฉบับ 100%
   cutIntegrityPassed: boolean;      // คัตติ้ง (คอ/แขน/ชายกระโปรง) ไม่ morphing
@@ -128,6 +146,8 @@ export interface DressProject {
   referenceAngles?: ReferenceAngles; // ด้านหน้า, ด้านหลัง, ซูมเนื้อผ้า
   modelPersona?: ModelPersona;       // นางแบบที่เลือกใช้
   garmentDna?: GarmentDNA;
+  storyboard?: StoryboardShot[];     // 6-shot (2x3) visual storyboard
+  promptDiffHistory?: PromptDiff[];  // ประวัติการแก้ไขสิ่งที่เพิ่ม/ตัดออก
   iterations: VideoIteration[];
   revisionMemories: RevisionMemory[];
 }

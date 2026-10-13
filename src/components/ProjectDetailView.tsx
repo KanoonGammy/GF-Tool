@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { DressProject, VideoIteration, DoDChecklist, RevisionMemory, GarmentDNA } from '../types';
+import { StoryboardDirectorView } from './StoryboardDirectorView';
 import { VideoReviewRoom } from './VideoReviewRoom';
-import { GoogleFlowPromptCard } from './GoogleFlowPromptCard';
 import { GarmentDnaView } from './GarmentDnaView';
+import { ArchetypeKnowledgeView } from './ArchetypeKnowledgeView';
 import { CumulativeMemoryTimeline } from './CumulativeMemoryTimeline';
 import { RevisionModal } from './RevisionModal';
 import { PersistentReferenceSidebar } from './PersistentReferenceSidebar';
-import { ArrowLeft, Video, Sparkles, BrainCircuit, ShieldCheck, Film, Layers, CheckCircle2, ChevronRight, User } from 'lucide-react';
+import { ArchetypeKnowledgeManager } from '../lib/archetypeKnowledge';
+import { ArrowLeft, Video, Sparkles, BrainCircuit, ShieldCheck, Film, Layers, CheckCircle2, ChevronRight, User, BookOpen } from 'lucide-react';
 import { ProjectStorage } from '../lib/storage';
 
 interface ProjectDetailViewProps {
@@ -20,15 +22,9 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   onBack,
   onUpdateProject
 }) => {
-  // Determine smart default tab based on project lifecycle
-  const getInitialTab = (): 'dna' | 'flow' | 'review' | 'memory' => {
-    if (project.status === 'ready_for_review') return 'review';
-    if (project.status === 'revision_requested') return 'flow';
-    if (project.status === 'approved') return 'review';
-    return 'dna'; // Default starting point: Review DNA & Model specs!
-  };
-
-  const [activeTab, setActiveTab] = useState<'dna' | 'flow' | 'review' | 'memory'>(getInitialTab());
+  // Determine smart default tab:
+  // User explicitly requested: Storyboard Grid & Prompt loop is the MAIN SCREEN ("ตรงนี้จะเป็นหน้าหลักเลย")!
+  const [activeTab, setActiveTab] = useState<'storyboard' | 'review' | 'dna' | 'knowledge'>('storyboard');
   const [selectedIterationIndex, setSelectedIterationIndex] = useState<number>(
     project.iterations && project.iterations.length > 0 ? project.iterations.length - 1 : 0
   );
@@ -42,6 +38,36 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     positivePrompt: 'คำสั่งสร้างวิดีโอยังไม่ถูกสร้าง',
     negativePrompt: 'default negatives',
     createdAt: new Date().toISOString()
+  };
+
+  // Handler for Proceeding to Video Generation from Storyboard
+  const handleProceedToVideoGeneration = (positivePrompt: string, negativePrompt: string) => {
+    // Generate new iteration and switch to DoD Review room!
+    const nextIterationNum = (project.iterations?.length || 0) + 1;
+    const newIteration: VideoIteration = {
+      id: `iter-${Date.now()}`,
+      iterationNumber: nextIterationNum,
+      videoUrl: project.iterations?.[0]?.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-fashion-model-in-a-pink-dress-posing-40742-large.mp4',
+      coverImageUrl: project.iterations?.[0]?.coverImageUrl || '/samples/pomelo_model_wearing.jpg',
+      positivePrompt,
+      negativePrompt,
+      durationSeconds: 10,
+      engine: 'google_flow_omni',
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedIterations = [...(project.iterations || []), newIteration];
+    const updatedProj: DressProject = {
+      ...project,
+      status: 'ready_for_review',
+      iterations: updatedIterations,
+      updatedAt: new Date().toISOString()
+    };
+
+    ProjectStorage.saveProject(updatedProj);
+    onUpdateProject(updatedProj);
+    setSelectedIterationIndex(updatedIterations.length - 1);
+    setActiveTab('review'); // Take user to DoD Review room!
   };
 
   // Handler for DoD Acceptance
@@ -74,7 +100,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   const handleSubmitRevision = (newMemory: RevisionMemory) => {
     const nextIterationNum = (project.iterations?.length || 0) + 1;
 
-    // Create new iteration record with refined prompt
+    // Create new iteration record
     const newIteration: VideoIteration = {
       id: `iter-${Date.now()}`,
       iterationNumber: nextIterationNum,
@@ -88,6 +114,13 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     const updatedMemories = [...(project.revisionMemories || []), newMemory];
     const updatedIterations = [...(project.iterations || []), newIteration];
 
+    // Automatically record caution rule into Archetype Knowledge Base so AI learns forever!
+    ArchetypeKnowledgeManager.addRuleFromFeedback(
+      project.category || 'knitwear',
+      newMemory.userFeedbackText,
+      newMemory.addedNegativeTokens
+    );
+
     const updatedProj: DressProject = {
       ...project,
       status: 'revision_requested',
@@ -99,7 +132,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     ProjectStorage.saveProject(updatedProj);
     onUpdateProject(updatedProj);
     setSelectedIterationIndex(updatedIterations.length - 1);
-    setActiveTab('flow'); // Flow Step 2: Go to Google Flow prompt studio to copy the new refined prompt!
+    setActiveTab('storyboard'); // Go back to Main Storyboard screen with updated diff!
   };
 
   // Handler for updating Garment DNA
@@ -111,40 +144,6 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     };
     ProjectStorage.saveProject(updatedProj);
     onUpdateProject(updatedProj);
-  };
-
-  // Handler for attaching a video to an iteration
-  const handleAttachVideo = (videoUrl: string, coverImageUrl?: string) => {
-    const updatedIterations = [...(project.iterations || [])];
-    if (updatedIterations[selectedIterationIndex]) {
-      updatedIterations[selectedIterationIndex] = {
-        ...updatedIterations[selectedIterationIndex],
-        videoUrl,
-        coverImageUrl: coverImageUrl || updatedIterations[selectedIterationIndex].coverImageUrl
-      };
-    } else {
-      updatedIterations.push({
-        id: `iter-${Date.now()}`,
-        iterationNumber: 1,
-        videoUrl,
-        positivePrompt: '',
-        negativePrompt: '',
-        durationSeconds: 10,
-        engine: 'google_flow_omni',
-        createdAt: new Date().toISOString()
-      });
-    }
-
-    const updatedProj: DressProject = {
-      ...project,
-      status: 'ready_for_review',
-      iterations: updatedIterations,
-      updatedAt: new Date().toISOString()
-    };
-
-    ProjectStorage.saveProject(updatedProj);
-    onUpdateProject(updatedProj);
-    setActiveTab('review'); // Take user forward to Step 3: DoD Review Room!
   };
 
   return (
@@ -197,10 +196,36 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         )}
       </div>
 
-      {/* Logical Step Pipeline Tabs Navigation (ตามลำดับการทำงานจริง) */}
+      {/* Main Tabs Navigation: Storyboard (Main) -> DoD Review -> Garment DNA -> AI Knowledge */}
       <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto">
         
-        {/* Step 1: Garment DNA & Model */}
+        {/* Tab 1: Main Screen - Storyboard 2x3 & Prompt Studio */}
+        <button
+          onClick={() => setActiveTab('storyboard')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
+            activeTab === 'storyboard'
+              ? 'bg-gradient-to-r from-pink-500 via-rose-500 to-indigo-600 text-white shadow-lg shadow-pink-500/25 ring-1 ring-pink-400'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <Film className="w-4 h-4" />
+          <span>1. หน้าหลัก: Storyboard (2x3) & Prompt Studio</span>
+        </button>
+
+        {/* Tab 2: Definition of Done Review Room */}
+        <button
+          onClick={() => setActiveTab('review')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
+            activeTab === 'review'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <Video className="w-4 h-4" />
+          <span>2. ตรวจรับงาน Definition of Done</span>
+        </button>
+
+        {/* Tab 3: Garment DNA & Fabric/Color Scanner */}
         <button
           onClick={() => setActiveTab('dna')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
@@ -210,52 +235,20 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           }`}
         >
           <Sparkles className="w-4 h-4" />
-          <span>Step 1: พาสปอร์ตชุด & นางแบบ (DNA)</span>
+          <span>3. พาสปอร์ตชุด & สแกนผ้า 4 สี (DNA)</span>
         </button>
 
-        <ChevronRight className="w-4 h-4 text-slate-600 flex-shrink-0" />
-
-        {/* Step 2: Google Flow Studio & Prompts */}
+        {/* Tab 4: AI Archetype Knowledge Base */}
         <button
-          onClick={() => setActiveTab('flow')}
+          onClick={() => setActiveTab('knowledge')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
-            activeTab === 'flow'
-              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
+            activeTab === 'knowledge'
+              ? 'bg-gradient-to-r from-amber-500 to-rose-600 text-white shadow-lg shadow-amber-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-900'
           }`}
         >
-          <Film className="w-4 h-4" />
-          <span>Step 2: Google Flow Studio & Prompts</span>
-        </button>
-
-        <ChevronRight className="w-4 h-4 text-slate-600 flex-shrink-0" />
-
-        {/* Step 3: Definition of Done Review Room */}
-        <button
-          onClick={() => setActiveTab('review')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
-            activeTab === 'review'
-              ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-500/20'
-              : 'text-slate-400 hover:text-white hover:bg-slate-900'
-          }`}
-        >
-          <Video className="w-4 h-4" />
-          <span>Step 3: ตรวจรับงาน Definition of Done</span>
-        </button>
-
-        <ChevronRight className="w-4 h-4 text-slate-600 flex-shrink-0" />
-
-        {/* Step 4: AI Cumulative Memory Bank */}
-        <button
-          onClick={() => setActiveTab('memory')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition flex-shrink-0 ${
-            activeTab === 'memory'
-              ? 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-lg shadow-teal-500/20'
-              : 'text-slate-400 hover:text-white hover:bg-slate-900'
-          }`}
-        >
-          <BrainCircuit className="w-4 h-4" />
-          <span>Step 4: คลังความจำ AI ({project.revisionMemories?.length || 0})</span>
+          <BookOpen className="w-4 h-4" />
+          <span>4. คลังข้อควรระวังตามประเภทเสื้อผ้า</span>
         </button>
 
       </div>
@@ -266,25 +259,17 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         {/* Left Column: Active Step Workspace (Takes 8-9 cols) */}
         <div className="lg:col-span-8 xl:col-span-9 space-y-6">
           
-          {/* Step 1: Garment DNA Passport */}
-          {activeTab === 'dna' && project.garmentDna && (
-            <GarmentDnaView
-              dna={project.garmentDna}
-              onUpdateDna={handleUpdateDna}
-            />
-          )}
-
-          {/* Step 2: Google Flow Studio */}
-          {activeTab === 'flow' && project.garmentDna && (
-            <GoogleFlowPromptCard
+          {/* Tab 1: Main Screen - Storyboard 2x3 Grid + Iterative Prompt Refinement */}
+          {activeTab === 'storyboard' && project.garmentDna && (
+            <StoryboardDirectorView
               project={project}
               dna={project.garmentDna}
-              memories={project.revisionMemories || []}
-              onAddIterationVideo={handleAttachVideo}
+              onProceedToVideoGeneration={handleProceedToVideoGeneration}
+              onUpdateProject={onUpdateProject}
             />
           )}
 
-          {/* Step 3: Video Review Room (Definition of Done) */}
+          {/* Tab 2: Definition of Done Review Room */}
           {activeTab === 'review' && (
             <VideoReviewRoom
               project={project}
@@ -294,11 +279,20 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
             />
           )}
 
-          {/* Step 4: AI Cumulative Memory Bank */}
-          {activeTab === 'memory' && (
-            <CumulativeMemoryTimeline
-              memories={project.revisionMemories || []}
+          {/* Tab 3: Garment DNA & Fabric Scanner */}
+          {activeTab === 'dna' && project.garmentDna && (
+            <GarmentDnaView
+              dna={project.garmentDna}
+              onUpdateDna={handleUpdateDna}
             />
+          )}
+
+          {/* Tab 4: AI Archetype Knowledge Base & Timeline */}
+          {activeTab === 'knowledge' && (
+            <div className="space-y-6">
+              <ArchetypeKnowledgeView currentCategory={project.category} />
+              <CumulativeMemoryTimeline memories={project.revisionMemories || []} />
+            </div>
           )}
         </div>
 
